@@ -17,7 +17,7 @@ Como Executar o Aplicativo
 Clone este repositório em sua máquina local.
 
 
-git clone [https://github.com/Luizgustavoo/appcaotacao.git](https://github.com/Luizgustavoo/appcaotacao.git)
+git clone [https://github.com/Luizgustavoo/appcaotacao.git](https://github.com/Luizgustavoo/app_caotacao.git)
 
 Navegue até o diretório do projeto.
 
