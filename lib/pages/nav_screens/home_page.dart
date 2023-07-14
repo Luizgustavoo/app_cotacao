@@ -12,28 +12,53 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _isLoading = true;
-  Future<void> loadCotacoes(BuildContext context) {
+  final loading = ValueNotifier(true);
+  late final ScrollController _scrollController;
+  Future<void> loadCotacoes(BuildContext context, int page) {
+    loading.value = true;
+    if (page != 0) {
+      Provider.of<Services>(context, listen: false).pageCount = page;
+    }
     return Provider.of<Services>(context, listen: false)
         .loadCotacoes('aguardando_presidente')
         .then((_) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          loading.value = false;
+        });
+      }
     });
+  }
+
+  infiniteScrolling() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !loading.value) {
+      loadCotacoes(context, 0);
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    loadCotacoes(context);
+    _scrollController = ScrollController();
+    _scrollController.addListener(infiniteScrolling);
+    Provider.of<Services>(context, listen: false).pageCount = 1;
+    loadCotacoes(context, 1);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    loading.value = false;
+    _scrollController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Constants.cinza,
-      body: _isLoading
+      body: loading.value
           ? Column(
               children: [
                 Center(
@@ -44,7 +69,7 @@ class _HomePageState extends State<HomePage> {
               ],
             )
           : RefreshIndicator(
-              onRefresh: () => loadCotacoes(context),
+              onRefresh: () => loadCotacoes(context, 1),
               child: Padding(
                   padding: const EdgeInsets.all(3.0),
                   child: Consumer<Services>(

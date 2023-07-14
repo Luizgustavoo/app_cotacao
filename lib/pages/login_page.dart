@@ -83,8 +83,8 @@ class __FormContentState extends State<_FormContent> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final usuarioController = TextEditingController(text: 'paulopennacchi');
-  final passwordController = TextEditingController(text: '12345678');
+  final usuarioController = TextEditingController();
+  final passwordController = TextEditingController();
 
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {

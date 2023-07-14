@@ -56,17 +56,18 @@ class _CotacaoTileState extends State<CotacaoTile> {
     }
   }
 
-  // @override
-  // void dispose() {
-  //   motivoController.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    motivoController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final UtilsServices utilsServices = UtilsServices();
-    final posicaoIfen = widget.cotacao.tituloCotacao.toString().indexOf('-');
-    final titulo = widget.cotacao.tituloCotacao!.substring(0, posicaoIfen);
+    // final posicaoIfen = widget.cotacao.tituloCotacao.toString().indexOf('-');
+    // final titulo = widget.cotacao.tituloCotacao!.substring(0, posicaoIfen);
+    final titulo = widget.cotacao.tituloCotacao!;
     final height = MediaQuery.sizeOf(context).height;
     return InkWell(
       onTap: widget.cotacao.statusCotacao == 'negado'
@@ -208,22 +209,38 @@ class _CotacaoTileState extends State<CotacaoTile> {
                             context: context,
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title: const Text("Observações"),
+                                title: const Text(
+                                  "OBSERVAÇÕES:",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 content: SizedBox(
-                                  height: height / 2,
+                                  height: height / 20,
                                   width: double.infinity,
                                   child: SingleChildScrollView(
                                     physics: const BouncingScrollPhysics(),
                                     child: Center(
-                                      child: Text(
-                                        "Observações: ${widget.cotacao.observacoes}"
-                                            .toUpperCase(),
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'Montserrat',
-                                        ),
-                                        textAlign: TextAlign.justify,
-                                      ),
+                                      child: widget.cotacao.observacoes == null
+                                          ? const Text(
+                                              'NÃO HÁ OBSERVAÇÕES PARA ESSA COTAÇÃO',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontFamily: 'Montserrat',
+                                              ),
+                                              textAlign: TextAlign.justify,
+                                            )
+                                          : Text(
+                                              "Observações: ${widget.cotacao.observacoes}"
+                                                  .toUpperCase(),
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontFamily: 'Montserrat',
+                                              ),
+                                              textAlign: TextAlign.justify,
+                                            ),
                                     ),
                                   ),
                                 ),

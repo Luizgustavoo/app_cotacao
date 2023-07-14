@@ -1,6 +1,6 @@
 import 'package:cotacao/constants/constants.dart';
 import 'package:cotacao/firebase_options.dart';
-import 'package:cotacao/pages/auth_or_home_page.dart';
+import 'package:cotacao/pages/splash_screen.dart';
 import 'package:cotacao/pages/base_screen.dart';
 import 'package:cotacao/repository/login.dart';
 import 'package:cotacao/utils/firebase_api.dart';
@@ -18,8 +18,9 @@ final navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Constants.verde));
+    statusBarColor: Colors.transparent,
+    systemNavigationBarColor: Constants.verde,
+  ));
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

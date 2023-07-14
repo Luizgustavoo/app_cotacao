@@ -14,39 +14,66 @@ class OrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<OrderPage> {
-  bool _isLoading = true;
-  Future<void> loadCotacoes(BuildContext context) {
+  final loading = ValueNotifier(true);
+  late final ScrollController _scrollController;
+  double loadThresholdPercentage = 0.99;
+  Future<void> loadCotacoes(BuildContext context, int page) {
+    loading.value = true;
+    if (page != 0) {
+      Provider.of<Services>(context, listen: false).pageCount = page;
+    }
     return Provider.of<Services>(context, listen: false)
         .loadCotacoes('aguardando_compra')
         .then((_) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          loading.value = false;
+        });
+      }
     });
+  }
+
+  void infiniteScrolling() {
+    double maxScroll = _scrollController.position.maxScrollExtent;
+    double currentScroll = _scrollController.position.pixels;
+    double scrollPercentage = currentScroll / maxScroll;
+    if (scrollPercentage > loadThresholdPercentage) {
+      loadCotacoes(context, 0);
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    loadCotacoes(context);
+    _scrollController = ScrollController();
+    _scrollController.addListener(infiniteScrolling);
+    Provider.of<Services>(context, listen: false).pageCount = 1;
+    loadCotacoes(context, 1);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    loading.value = false;
+    _scrollController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _isLoading
+      body: loading.value
           ? Center(
               child: CircularProgressIndicator(
                 color: Colors.green.shade500,
               ),
             )
           : RefreshIndicator(
-              onRefresh: () => loadCotacoes(context),
+              onRefresh: () => loadCotacoes(context, 1),
               child: Padding(
                   padding: const EdgeInsets.all(3.0),
                   child: Consumer<Services>(
                     builder: (context, services, _) {
-                      final cotacao = services.items;
+                      final cotacao = services.listModel;
                       return services.itemsCount <= 0
                           ? SingleChildScrollView(
                               physics: const AlwaysScrollableScrollPhysics(),
@@ -65,17 +92,48 @@ class _OrderPageState extends State<OrderPage> {
                                 ),
                               ),
                             )
-                          : ListView.builder(
-                              itemCount: 50,
-                              itemBuilder: (ctx, i) {
-                                return CotacaoTile(
-                                  cotacao: cotacao[i],
-                                );
-                              },
+                          : Stack(
+                              children: [
+                                ListView.builder(
+                                  controller: _scrollController,
+                                  itemCount: cotacao.length,
+                                  itemBuilder: (ctx, i) {
+                                    return CotacaoTile(
+                                      cotacao: cotacao[i],
+                                    );
+                                  },
+                                ),
+                                loadingIndicatorWidget()
+                              ],
                             );
                     },
                   )),
             ),
     );
+  }
+
+  loadingIndicatorWidget() {
+    return ValueListenableBuilder(
+        valueListenable: loading,
+        builder: (context, bool isLoading, _) {
+          return (isLoading)
+              ? Positioned(
+                  left: (MediaQuery.of(context).size.width / 2) - 20,
+                  bottom: 80,
+                  child: const CircleAvatar(
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                  ))
+              : Container();
+        });
   }
 }

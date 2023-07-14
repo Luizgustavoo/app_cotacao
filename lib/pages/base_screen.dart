@@ -7,10 +7,11 @@ import 'package:cotacao/pages/nav_screens/waiting_buy.dart';
 import 'package:cotacao/repository/login.dart';
 import 'package:cotacao/utils/connective_service.dart';
 import 'package:cotacao/utils/internet_status_provider.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 class BaseScreen extends StatefulWidget {
   static const route = '/base-screen';
@@ -22,11 +23,19 @@ class BaseScreen extends StatefulWidget {
 
 class _BaseScreenState extends State<BaseScreen> {
   InternetStatusProvider? _statusProvider;
+  final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   int pageIndex = 1;
+  int tituloIndex = 1;
   List pages = [
     const OrderPage(),
     const HomePage(),
     const RecuseOrderPage(),
+  ];
+
+  List<String> titulos = [
+    "COTAÇÕES APROVADAS",
+    "COTAÇÕES",
+    "COTAÇÕES RECUSADAS"
   ];
 
   @override
@@ -39,17 +48,31 @@ class _BaseScreenState extends State<BaseScreen> {
 
   void _updateStatus(ConnectivityResult result) {
     if (result == ConnectivityResult.none) {
-      _statusProvider?.setStatus(InternetStatus.disconnected);
+      _statusProvider!.setStatus(InternetStatus.disconnected);
+      mostrarSnackBar();
     } else {
-      _statusProvider?.setStatus(InternetStatus.connected);
+      _statusProvider!.setStatus(InternetStatus.connected);
     }
+  }
+
+  void mostrarSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: const Text('Você está sem conexão com a internet.'),
+      duration: const Duration(seconds: 3),
+      backgroundColor: Colors.red.shade400,
+      elevation: 3,
+      action: SnackBarAction(
+        label: 'Fechar',
+        onPressed: () => Get.back(),
+      ),
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('COTAÇÕES'),
+          title: Text(titulos[tituloIndex]),
           actions: [
             IconButton(
                 onPressed: () {
@@ -60,57 +83,62 @@ class _BaseScreenState extends State<BaseScreen> {
           ],
         ),
         extendBody: true,
-        bottomNavigationBar: CurvedNavigationBar(
-          height: 55,
-          backgroundColor: Colors.transparent,
-          color: Constants.verde,
-          animationCurve: Curves.easeInOut,
-          index: pageIndex,
-          items: const [
-            Icon(
-              Icons.price_check_rounded,
-              size: 30,
-              color: Colors.white,
+        bottomNavigationBar: GNav(
+          backgroundColor: Constants.verde,
+          color: Colors.white,
+          activeColor: Colors.black,
+          curve: Curves.easeInOut,
+          iconSize: 30,
+          gap: 5,
+          duration: const Duration(milliseconds: 150),
+          rippleColor:
+              Constants.verdeclaro, // tab button ripple color when pressed
+          hoverColor: Constants.verdeclaro, // ta
+          tabBorderRadius: 30,
+          tabs: const [
+            GButton(
+              icon: Icons.thumb_up_off_alt_outlined,
+              text: 'APROVADAS',
             ),
-            Icon(
-              Icons.all_inbox_rounded,
-              size: 30,
-              color: Colors.white,
+            GButton(
+              icon: Icons.receipt_long_outlined,
+              text: 'PENDENTES',
             ),
-            Icon(
-              Icons.remove_shopping_cart_rounded,
-              size: 30,
-              color: Colors.white,
+            GButton(
+              icon: Icons.thumb_down_alt_outlined,
+              text: 'RECUSADAS',
             ),
           ],
-          animationDuration: const Duration(milliseconds: 400),
-          onTap: (index) {
+          selectedIndex: pageIndex,
+          onTabChange: (index) {
             setState(() {
               pageIndex = index;
+              tituloIndex = index;
             });
           },
         ),
         body: Consumer<InternetStatusProvider>(
           builder: (context, statusProvider, _) {
             if (statusProvider.status == InternetStatus.disconnected) {
-              return const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              return Stack(
                 children: [
-                  Center(
-                    child: Text(
-                      textAlign: TextAlign.center,
-                      'Sem conexão com a internet, conecte-se novamente!',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'Montserrat',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                  ListView.builder(
+                    itemBuilder: (context, index) {
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey.shade300,
+                        highlightColor: Colors.grey.shade100,
+                        child: const SizedBox(
+                          width: double.infinity,
+                          height: 120,
+                          child: Card(
+                            child: ListTile(),
+                          ),
+                        ),
+                      );
+                    },
+                    itemCount:
+                        15, // substitua pelo número de itens na sua lista
                   ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  CircularProgressIndicator()
                 ],
               );
             } else {

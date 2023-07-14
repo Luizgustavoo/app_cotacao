@@ -11,29 +11,54 @@ class RecuseOrderPage extends StatefulWidget {
 }
 
 class _RecuseOrderPageState extends State<RecuseOrderPage> {
-  bool _isLoading = true;
-  Future<void> loadCotacoes(BuildContext context) {
+  final loading = ValueNotifier(true);
+  late final ScrollController _scrollController;
+  Future<void> loadCotacoes(BuildContext context, int page) {
+    loading.value = true;
+    if (page != 0) {
+      Provider.of<Services>(context, listen: false).pageCount = page;
+    }
     return Provider.of<Services>(context, listen: false)
         .loadCotacoes('negado')
         .then((_) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          loading.value = false;
+        });
+      }
     });
+  }
+
+  infiniteScrolling() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !loading.value) {
+      loadCotacoes(context, 0);
+    }
   }
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(infiniteScrolling);
+    Provider.of<Services>(context, listen: false).pageCount = 1;
+    loadCotacoes(context, 1);
+  }
 
-    loadCotacoes(context);
+  @override
+  void dispose() {
+    super.dispose();
+    loading.value = false;
+    _scrollController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _isLoading
+      body: loading.value
           ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Center(
                   child: CircularProgressIndicator(
@@ -43,7 +68,7 @@ class _RecuseOrderPageState extends State<RecuseOrderPage> {
               ],
             )
           : RefreshIndicator(
-              onRefresh: () => loadCotacoes(context),
+              onRefresh: () => loadCotacoes(context, 1),
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
                 child: Consumer<Services>(
@@ -68,7 +93,7 @@ class _RecuseOrderPageState extends State<RecuseOrderPage> {
                             ),
                           )
                         : ListView.builder(
-                            itemCount: 50,
+                            itemCount: cotacao.length,
                             itemBuilder: (ctx, i) {
                               return CotacaoTile(
                                 cotacao: cotacao[i],
