@@ -1,7 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:cotacao/constants/constants.dart';
-import 'package:cotacao/pages/nav_screens/home_page.dart';
 import 'package:cotacao/pages/login_page.dart';
+import 'package:cotacao/pages/nav_screens/home_page.dart';
 import 'package:cotacao/pages/nav_screens/recuse_buy.dart';
 import 'package:cotacao/pages/nav_screens/waiting_buy.dart';
 import 'package:cotacao/repository/login.dart';
@@ -76,8 +76,62 @@ class _BaseScreenState extends State<BaseScreen> {
           actions: [
             IconButton(
                 onPressed: () {
-                  Provider.of<Login>(context, listen: false).logout();
-                  Get.offAll(() => const LoginPage());
+                  showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          title: Text(
+                            'SAIR',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Montserrat',
+                              fontSize: 17,
+                              color: Constants.verde,
+                            ),
+                          ),
+                          content: const Text(
+                            'Deseja realmente sair do aplicativo?',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  Get.back();
+                                });
+                              },
+                              child: const Text(
+                                'CANCELAR',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red),
+                              onPressed: () {
+                                Provider.of<Login>(context, listen: false)
+                                    .logout();
+                                Get.offAll(() => const LoginPage());
+                              },
+                              child: const Text(
+                                'CONFIRMAR',
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        );
+                      });
                 },
                 icon: const Icon(Icons.exit_to_app_rounded))
           ],

@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:cotacao/constants/constants.dart';
 import 'package:cotacao/pages/base_screen.dart';
 import 'package:cotacao/repository/login.dart';
@@ -86,25 +87,62 @@ class __FormContentState extends State<_FormContent> {
   final usuarioController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void _submit() {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true;
-      });
-      Provider.of<Login>(context, listen: false)
-          .logar(usuarioController.text, passwordController.text)
-          .then((value) {
+  bool resultInternet = false;
+
+  checkStatus() async {
+    var result = await Connectivity().checkConnectivity();
+
+    if (mounted) {
+      // Verifica se o widget está montado antes de atualizar o estado
+      if (result == ConnectivityResult.mobile ||
+          result == ConnectivityResult.wifi) {
         setState(() {
+          resultInternet = true;
+        });
+      } else {
+        setState(() {
+          resultInternet = false;
           _isLoading = false;
         });
-        if (value == true) {
-          Get.offAll(() => const BaseScreen());
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Usuário ou senha inválidos')));
-        }
-      });
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Verifique sua conexão com a internet!"),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
+  }
+
+  void _submit() {
+    checkStatus();
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    setState(() {
+      _isLoading = true;
+    });
+    Provider.of<Login>(context, listen: false)
+        .logar(usuarioController.text, passwordController.text)
+        .then((value) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      _formKey.currentState!.save();
+      if (value == true) {
+        Get.offAll(() => const BaseScreen());
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.red.shade500,
+            content: const Text(
+              'Usuário ou senha inválidos',
+              style: TextStyle(fontFamily: 'Poppins', color: Colors.white),
+            )));
+      }
+    });
   }
 
   @override
@@ -130,7 +168,7 @@ class __FormContentState extends State<_FormContent> {
                 labelText: 'Usuário',
                 hintText: 'Digite seu usuário',
                 prefixIcon: Icon(
-                  Icons.email_outlined,
+                  Icons.person,
                   size: 22,
                   color: Constants.verde,
                 ),
@@ -156,7 +194,7 @@ class __FormContentState extends State<_FormContent> {
                   labelText: 'Senha',
                   hintText: 'Digite sua senha',
                   prefixIcon: Icon(
-                    Icons.lock_outline_rounded,
+                    Icons.lock_rounded,
                     size: 22,
                     color: Constants.verde,
                   ),
