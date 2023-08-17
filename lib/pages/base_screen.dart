@@ -26,6 +26,7 @@ class _BaseScreenState extends State<BaseScreen> {
   final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   int pageIndex = 1;
   int tituloIndex = 1;
+  String searchQuery = '';
   List pages = [
     const OrderPage(),
     const HomePage(),
