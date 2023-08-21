@@ -153,7 +153,7 @@ class _OrderHeroState extends State<OrderHero> {
                                       Provider.of<Services>(context,
                                               listen: false)
                                           .loadCotacoes(
-                                              'aguardando_presidente');
+                                              'aguardando_presidente', '0');
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(

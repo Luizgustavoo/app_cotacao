@@ -178,6 +178,10 @@ provider
 2.12
 file:///C:/Users/luiz/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.0.5/
 file:///C:/Users/luiz/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.0.5/lib/
+retry
+3.0
+file:///C:/Users/luiz/AppData/Local/Pub/Cache/hosted/pub.dev/retry-3.1.2/
+file:///C:/Users/luiz/AppData/Local/Pub/Cache/hosted/pub.dev/retry-3.1.2/lib/
 shared_preferences
 2.18
 file:///C:/Users/luiz/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.1.2/
@@ -260,8 +264,8 @@ file:///C:/Users/luiz/AppData/Local/Pub/Cache/hosted/pub.dev/xml-6.3.0/
 file:///C:/Users/luiz/AppData/Local/Pub/Cache/hosted/pub.dev/xml-6.3.0/lib/
 cotacao
 3.0
-file:///C:/Users/luiz/StudioProjects/cotacao/
-file:///C:/Users/luiz/StudioProjects/cotacao/lib/
+file:///C:/flutterprojects/cotacao/
+file:///C:/flutterprojects/cotacao/lib/
 sky_engine
 3.0
 file:///C:/src/flutter/bin/cache/pkg/sky_engine/

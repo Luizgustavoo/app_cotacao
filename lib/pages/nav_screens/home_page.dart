@@ -1,6 +1,7 @@
 import 'package:cotacao/constants/constants.dart';
 import 'package:cotacao/repository/service.dart';
 import 'package:cotacao/widgets/cotacao_tile.dart';
+import 'package:cotacao/widgets/search_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,14 +15,16 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final loading = ValueNotifier(true);
   late final ScrollController _scrollController;
+  final TextEditingController _controller = TextEditingController();
   String searchQuery = '';
-  Future<void> loadCotacoes(BuildContext context, int page) {
+  double loadThresholdPercentage = 0.99;
+  Future<void> loadCotacoes(BuildContext context, int page, String filtro) {
     loading.value = true;
     if (page != 0) {
       Provider.of<Services>(context, listen: false).pageCount = page;
     }
     return Provider.of<Services>(context, listen: false)
-        .loadCotacoes('aguardando_presidente')
+        .loadCotacoes('aguardando_presidente', filtro)
         .then((_) {
       if (mounted) {
         setState(() {
@@ -31,11 +34,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  infiniteScrolling() {
-    if (_scrollController.position.pixels ==
-            _scrollController.position.maxScrollExtent &&
-        !loading.value) {
-      loadCotacoes(context, 0);
+  void infiniteScrolling() {
+    double maxScroll = _scrollController.position.maxScrollExtent;
+    double currentScroll = _scrollController.position.pixels;
+    double scrollPercentage = currentScroll / maxScroll;
+    if (scrollPercentage > loadThresholdPercentage) {
+      var filtro = _controller.text.isNotEmpty ? _controller.text : '0';
+      loadCotacoes(context, 0, filtro);
     }
   }
 
@@ -45,7 +50,7 @@ class _HomePageState extends State<HomePage> {
     _scrollController = ScrollController();
     _scrollController.addListener(infiniteScrolling);
     Provider.of<Services>(context, listen: false).pageCount = 1;
-    loadCotacoes(context, 1);
+    loadCotacoes(context, 1, '0');
   }
 
   @override
@@ -70,33 +75,23 @@ class _HomePageState extends State<HomePage> {
               ],
             )
           : RefreshIndicator(
-              onRefresh: () => loadCotacoes(context, 1),
+              onRefresh: () async {
+                _controller.text = '';
+                await loadCotacoes(context, 1, '0');
+              },
               child: Padding(
                   padding: const EdgeInsets.all(3.0),
                   child: Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              searchQuery = value;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Pesquisar cotações...',
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: Colors.grey.shade800,
-                            ),
-                            hintStyle: TextStyle(
-                              fontFamily: 'Poppins',
-                              color: Colors.grey.shade800,
-                            ),
-                          ),
-                        ),
-                      ),
+                      SearchTextField(
+                          controller: _controller,
+                          onSearchPressed: (context, page, query) {
+                            if (_controller.text.isNotEmpty) {
+                              loadCotacoes(context, 1, _controller.text.trim());
+                            } else {
+                              FocusScope.of(context).unfocus();
+                            }
+                          }),
                       Expanded(
                         child: Consumer<Services>(
                           builder: (context, services, _) {

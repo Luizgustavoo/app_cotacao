@@ -35,7 +35,7 @@ class _CotacaoTileState extends State<CotacaoTile> {
           .then((value) {
         motivoController.clear();
         Provider.of<Services>(context, listen: false)
-            .loadCotacoes('aguardando_presidente');
+            .loadCotacoes('aguardando_presidente', '0');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -160,7 +160,8 @@ class _CotacaoTileState extends State<CotacaoTile> {
                               onPressed: () {
                                 setState(() {
                                   Provider.of<Services>(context, listen: false)
-                                      .loadCotacoes('aguardando_presidente');
+                                      .loadCotacoes(
+                                          'aguardando_presidente', '0');
                                   Get.back();
                                 });
                               },

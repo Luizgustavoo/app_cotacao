@@ -116,33 +116,44 @@ class __FormContentState extends State<_FormContent> {
     }
   }
 
-  void _submit() {
+  void _submit() async {
     checkStatus();
+
+    if (!resultInternet) {
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
     setState(() {
       _isLoading = true;
     });
-    Provider.of<Login>(context, listen: false)
-        .logar(usuarioController.text, passwordController.text)
-        .then((value) {
-      setState(() {
-        _isLoading = false;
-      });
 
-      _formKey.currentState!.save();
-      if (value == true) {
-        Get.offAll(() => const BaseScreen());
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            backgroundColor: Colors.red.shade500,
-            content: const Text(
-              'Usuário ou senha inválidos',
-              style: TextStyle(fontFamily: 'Poppins', color: Colors.white),
-            )));
-      }
+    final loginProvider = Provider.of<Login>(context, listen: false);
+
+    bool loginSuccess = await loginProvider.logar(
+      usuarioController.text,
+      passwordController.text,
+    );
+
+    setState(() {
+      _isLoading = false;
     });
+
+    if (loginSuccess) {
+      Get.offAll(() => const BaseScreen());
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.red.shade500,
+        content: const Text(
+          'Usuário ou senha inválidos',
+          style: TextStyle(fontFamily: 'Poppins', color: Colors.white),
+        ),
+      ));
+    }
   }
 
   @override

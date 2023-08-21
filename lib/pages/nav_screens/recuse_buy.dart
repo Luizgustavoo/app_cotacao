@@ -15,13 +15,16 @@ class _RecuseOrderPageState extends State<RecuseOrderPage> {
   final loading = ValueNotifier(true);
   late final ScrollController _scrollController;
   String searchQuery = '';
-  Future<void> loadCotacoes(BuildContext context, int page) {
+  final TextEditingController _controller = TextEditingController();
+  double loadThresholdPercentage = 0.99;
+
+  Future<void> loadCotacoes(BuildContext context, int page, String filtro) {
     loading.value = true;
     if (page != 0) {
       Provider.of<Services>(context, listen: false).pageCount = page;
     }
     return Provider.of<Services>(context, listen: false)
-        .loadCotacoes('negado')
+        .loadCotacoes('negado', filtro)
         .then((_) {
       if (mounted) {
         setState(() {
@@ -31,11 +34,13 @@ class _RecuseOrderPageState extends State<RecuseOrderPage> {
     });
   }
 
-  infiniteScrolling() {
-    if (_scrollController.position.pixels ==
-            _scrollController.position.maxScrollExtent &&
-        !loading.value) {
-      loadCotacoes(context, 0);
+  void infiniteScrolling() {
+    double maxScroll = _scrollController.position.maxScrollExtent;
+    double currentScroll = _scrollController.position.pixels;
+    double scrollPercentage = currentScroll / maxScroll;
+    if (scrollPercentage > loadThresholdPercentage) {
+      var filtro = _controller.text.isNotEmpty ? _controller.text : '0';
+      loadCotacoes(context, 0, filtro);
     }
   }
 
@@ -45,7 +50,7 @@ class _RecuseOrderPageState extends State<RecuseOrderPage> {
     _scrollController = ScrollController();
     _scrollController.addListener(infiniteScrolling);
     Provider.of<Services>(context, listen: false).pageCount = 1;
-    loadCotacoes(context, 1);
+    loadCotacoes(context, 1, '0');
   }
 
   @override
@@ -70,18 +75,20 @@ class _RecuseOrderPageState extends State<RecuseOrderPage> {
               ],
             )
           : RefreshIndicator(
-              onRefresh: () => loadCotacoes(context, 1),
+              onRefresh: () => loadCotacoes(context, 1, '0'),
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
                 child: Column(
                   children: [
                     SearchTextField(
-                      onTextChanged: (value) {
-                        setState(() {
-                          searchQuery = value;
-                        });
-                      },
-                    ),
+                        controller: _controller,
+                        onSearchPressed: (context, page, query) {
+                          if (_controller.text.isNotEmpty) {
+                            loadCotacoes(context, 1, _controller.text.trim());
+                          } else {
+                            FocusScope.of(context).unfocus();
+                          }
+                        }),
                     Expanded(
                       child: Consumer<Services>(
                         builder: (context, services, _) {

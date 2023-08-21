@@ -17,15 +17,17 @@ class OrderPage extends StatefulWidget {
 class _OrderPageState extends State<OrderPage> {
   final loading = ValueNotifier(true);
   late final ScrollController _scrollController;
+  final TextEditingController _controller = TextEditingController();
   String searchQuery = '';
   double loadThresholdPercentage = 0.99;
-  Future<void> loadCotacoes(BuildContext context, int page) {
+
+  Future<void> loadCotacoes(BuildContext context, int page, String filtro) {
     loading.value = true;
     if (page != 0) {
       Provider.of<Services>(context, listen: false).pageCount = page;
     }
     return Provider.of<Services>(context, listen: false)
-        .loadCotacoes('aguardando_compra')
+        .loadCotacoes('aguardando_compra', filtro)
         .then((_) {
       if (mounted) {
         setState(() {
@@ -40,7 +42,8 @@ class _OrderPageState extends State<OrderPage> {
     double currentScroll = _scrollController.position.pixels;
     double scrollPercentage = currentScroll / maxScroll;
     if (scrollPercentage > loadThresholdPercentage) {
-      loadCotacoes(context, 0);
+      var filtro = _controller.text.isNotEmpty ? _controller.text : '0';
+      loadCotacoes(context, 0, filtro);
     }
   }
 
@@ -50,7 +53,7 @@ class _OrderPageState extends State<OrderPage> {
     _scrollController = ScrollController();
     _scrollController.addListener(infiniteScrolling);
     Provider.of<Services>(context, listen: false).pageCount = 1;
-    loadCotacoes(context, 1);
+    loadCotacoes(context, 1, '0');
   }
 
   @override
@@ -70,26 +73,27 @@ class _OrderPageState extends State<OrderPage> {
               ),
             )
           : RefreshIndicator(
-              onRefresh: () => loadCotacoes(context, 1),
+              onRefresh: () async {
+                _controller.text = '';
+                await loadCotacoes(context, 1, '0');
+              },
               child: Padding(
                   padding: const EdgeInsets.all(3.0),
                   child: Column(
                     children: [
                       SearchTextField(
-                        onTextChanged: (value) {
-                          setState(() {
-                            searchQuery = value;
-                          });
-                        },
-                      ),
+                          controller: _controller,
+                          onSearchPressed: (context, page, query) {
+                            if (_controller.text.isNotEmpty) {
+                              loadCotacoes(context, 1, _controller.text.trim());
+                            } else {
+                              FocusScope.of(context).unfocus();
+                            }
+                          }),
                       Expanded(
                         child: Consumer<Services>(
                           builder: (context, services, _) {
-                            final cotacao = services.listModel.where((cotacao) {
-                              return cotacao.tituloCotacao!
-                                  .toLowerCase()
-                                  .contains(searchQuery.toLowerCase());
-                            }).toList();
+                            final cotacao = services.listModel;
                             return services.itemsCount <= 0
                                 ? SingleChildScrollView(
                                     physics:
