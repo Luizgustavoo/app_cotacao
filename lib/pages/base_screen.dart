@@ -1,7 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:cotacao/constants/constants.dart';
 import 'package:cotacao/pages/login_page.dart';
-import 'package:cotacao/pages/nav_screens/home_page.dart';
+import 'package:cotacao/pages/nav_screens/waiting_president.dart';
 import 'package:cotacao/pages/nav_screens/recuse_buy.dart';
 import 'package:cotacao/pages/nav_screens/waiting_buy.dart';
 import 'package:cotacao/repository/login.dart';
@@ -28,9 +28,9 @@ class _BaseScreenState extends State<BaseScreen> {
   int tituloIndex = 1;
   String searchQuery = '';
   List pages = [
-    const OrderPage(),
-    const HomePage(),
-    const RecuseOrderPage(),
+    const WaitingBuyOrderPage(),
+    const WaitingPresidentOrderPage(),
+    const RecuseBuyOrderPage(),
   ];
 
   List<String> titulos = [

@@ -1,3 +1,4 @@
+import 'package:cotacao/constants/constants.dart';
 import 'package:cotacao/repository/service.dart';
 import 'package:cotacao/widgets/cotacao_tile.dart';
 import 'package:cotacao/widgets/search_widget.dart';
@@ -5,21 +6,16 @@ import 'package:cotacao/widgets/search_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class OrderPage extends StatefulWidget {
-  const OrderPage({
-    super.key,
-  });
+class WaitingBuyOrderPage extends StatefulWidget {
+  const WaitingBuyOrderPage({super.key});
 
   @override
-  State<OrderPage> createState() => _OrderPageState();
+  State<WaitingBuyOrderPage> createState() => _WaitingBuyOrderPageState();
 }
 
-class _OrderPageState extends State<OrderPage> {
+class _WaitingBuyOrderPageState extends State<WaitingBuyOrderPage> {
   final loading = ValueNotifier(true);
-  late final ScrollController _scrollController;
   final TextEditingController _controller = TextEditingController();
-  String searchQuery = '';
-  double loadThresholdPercentage = 0.99;
 
   Future<void> loadCotacoes(BuildContext context, int page, String filtro) {
     loading.value = true;
@@ -37,21 +33,9 @@ class _OrderPageState extends State<OrderPage> {
     });
   }
 
-  void infiniteScrolling() {
-    double maxScroll = _scrollController.position.maxScrollExtent;
-    double currentScroll = _scrollController.position.pixels;
-    double scrollPercentage = currentScroll / maxScroll;
-    if (scrollPercentage > loadThresholdPercentage) {
-      var filtro = _controller.text.isNotEmpty ? _controller.text : '0';
-      loadCotacoes(context, 0, filtro);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(infiniteScrolling);
     Provider.of<Services>(context, listen: false).pageCount = 1;
     loadCotacoes(context, 1, '0');
   }
@@ -60,12 +44,12 @@ class _OrderPageState extends State<OrderPage> {
   void dispose() {
     super.dispose();
     loading.value = false;
-    _scrollController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Constants.cinza,
       body: loading.value
           ? Center(
               child: CircularProgressIndicator(
@@ -117,14 +101,35 @@ class _OrderPageState extends State<OrderPage> {
                                   )
                                 : Stack(
                                     children: [
-                                      ListView.builder(
-                                        controller: _scrollController,
-                                        itemCount: cotacao.length,
-                                        itemBuilder: (ctx, i) {
-                                          return CotacaoTile(
-                                            cotacao: cotacao[i],
-                                          );
+                                      NotificationListener<ScrollNotification>(
+                                        onNotification: (ScrollNotification
+                                            scrollNotification) {
+                                          double loadThresholdPercentage = 0.99;
+                                          double maxScroll = scrollNotification
+                                              .metrics.maxScrollExtent;
+                                          double currentScroll =
+                                              scrollNotification.metrics.pixels;
+                                          double scrollPercentage =
+                                              currentScroll / maxScroll;
+                                          if (scrollPercentage >
+                                              loadThresholdPercentage) {
+                                            var filtro =
+                                                _controller.text.isNotEmpty
+                                                    ? _controller.text
+                                                    : '0';
+                                            loadCotacoes(context, 0, filtro);
+                                          }
+                                          return false;
                                         },
+                                        child: ListView.builder(
+                                          // controller: _scrollController,
+                                          itemCount: cotacao.length,
+                                          itemBuilder: (ctx, i) {
+                                            return CotacaoTile(
+                                              cotacao: cotacao[i],
+                                            );
+                                          },
+                                        ),
                                       ),
                                       loadingIndicatorWidget()
                                     ],
