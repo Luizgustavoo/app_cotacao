@@ -115,7 +115,6 @@ class _RecuseBuyOrderPageState extends State<RecuseBuyOrderPage> {
                                         return false;
                                       },
                                       child: ListView.builder(
-                                        // controller: _scrollController,
                                         itemCount: cotacao.length,
                                         itemBuilder: (ctx, i) {
                                           return CotacaoTile(

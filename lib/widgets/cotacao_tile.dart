@@ -39,7 +39,7 @@ class _CotacaoTileState extends State<CotacaoTile> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "Cotação nº ${widget.cotacao.idCotacao} negada com sucesso!",
+              "Cotação nº ${widget.cotacao.idCotacao} negada!",
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 17,
@@ -65,8 +65,6 @@ class _CotacaoTileState extends State<CotacaoTile> {
   @override
   Widget build(BuildContext context) {
     final UtilsServices utilsServices = UtilsServices();
-    // final posicaoIfen = widget.cotacao.tituloCotacao.toString().indexOf('-');
-    // final titulo = widget.cotacao.tituloCotacao!.substring(0, posicaoIfen);
     final titulo = widget.cotacao.tituloCotacao!;
     final height = MediaQuery.sizeOf(context).height;
     return InkWell(
@@ -205,61 +203,69 @@ class _CotacaoTileState extends State<CotacaoTile> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                   trailing: IconButton(
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text(
-                                  "OBSERVAÇÕES:",
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontFamily: 'Montserrat',
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                content: SizedBox(
-                                  height: height / 20,
-                                  width: double.infinity,
-                                  child: SingleChildScrollView(
-                                    physics: const BouncingScrollPhysics(),
-                                    child: Center(
-                                      child: widget.cotacao.observacoes == null
-                                          ? const Text(
-                                              'NÃO HÁ OBSERVAÇÕES PARA ESSA COTAÇÃO',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontFamily: 'Montserrat',
-                                              ),
-                                              textAlign: TextAlign.justify,
-                                            )
-                                          : Text(
-                                              "Observações: ${widget.cotacao.observacoes}"
-                                                  .toUpperCase(),
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontFamily: 'Montserrat',
-                                              ),
-                                              textAlign: TextAlign.justify,
-                                            ),
-                                    ),
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () {
-                                        Get.back();
-                                      },
-                                      child: const Text('Fechar'))
-                                ],
-                              );
-                            });
-                      },
-                      icon: Icon(
-                        Icons.info_rounded,
-                        size: 30,
-                        color: Colors.blue.shade500,
-                      )),
+                      onPressed: widget.cotacao.observacoes == null
+                          ? () {}
+                          : () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text(
+                                        "OBSERVAÇÕES:",
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontFamily: 'Montserrat',
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      content: SizedBox(
+                                        height: height / 20,
+                                        width: double.infinity,
+                                        child: SingleChildScrollView(
+                                          physics:
+                                              const BouncingScrollPhysics(),
+                                          child: Center(
+                                            child: widget.cotacao.observacoes ==
+                                                    null
+                                                ? const Text(
+                                                    'NÃO HÁ OBSERVAÇÕES PARA ESSA COTAÇÃO',
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontFamily: 'Montserrat',
+                                                    ),
+                                                    textAlign:
+                                                        TextAlign.justify,
+                                                  )
+                                                : Text(
+                                                    "Observações: ${widget.cotacao.observacoes}"
+                                                        .toUpperCase(),
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontFamily: 'Montserrat',
+                                                    ),
+                                                    textAlign:
+                                                        TextAlign.justify,
+                                                  ),
+                                          ),
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {
+                                              Get.back();
+                                            },
+                                            child: const Text('Fechar'))
+                                      ],
+                                    );
+                                  });
+                            },
+                      icon: widget.cotacao.observacoes == null
+                          ? const SizedBox()
+                          : Icon(
+                              Icons.info_rounded,
+                              size: 30,
+                              color: Colors.blue.shade500,
+                            )),
                   leading: CircleAvatar(
                     backgroundColor: widget.cotacao.statusCotacao ==
                             'aguardando_presidente'

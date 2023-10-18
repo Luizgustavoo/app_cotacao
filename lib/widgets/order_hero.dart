@@ -158,7 +158,7 @@ class _OrderHeroState extends State<OrderHero> {
                                           .showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            value.toString(),
+                                            'Cotação nº ${widget.cotacao.idCotacao} aprovada com sucesso!',
                                             textAlign: TextAlign.center,
                                             style: const TextStyle(
                                               fontSize: 17,
