@@ -1,0 +1,1 @@
+ C:\\flutterprojects\\cotacao\\.dart_tool\\flutter_build\\de05733922230759c5ae896795fb24e0\\native_assets.yaml: 

@@ -79,6 +79,7 @@ class _WaitingPresidentOrderPageState extends State<WaitingPresidentOrderPage> {
                         child: Consumer<Services>(
                           builder: (context, services, _) {
                             final cotacao = services.listModel;
+                            // print('Cotacoes: ${cotacao.length}');
                             return services.itemsCount <= 0
                                 ? SingleChildScrollView(
                                     physics:
@@ -125,6 +126,8 @@ class _WaitingPresidentOrderPageState extends State<WaitingPresidentOrderPage> {
                                         child: ListView.builder(
                                           itemCount: cotacao.length,
                                           itemBuilder: (ctx, i) {
+                                            // print(
+                                            //     'Cotacoes STACK: ${cotacao.length}');
                                             if (cotacao[i].tCotacao == "P" &&
                                                 int.parse(
                                                         cotacao[i].qProdutos!) >
